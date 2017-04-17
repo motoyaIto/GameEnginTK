@@ -1,0 +1,26 @@
+初期画面の青い画面が出なかったときにGame.cppの
+157 creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+をコメントアウト
+
+制作開始時に
+ソリューション->追加->既存のプロジェクト
+c:->DirectXTK->DirectXTK_Dektop_2015.vcxprojを追加
+
+自分で追加した方->追加->参照->DirectXTK_Desktop_2015を選択して追加
+
+
+自分で追加した方->プロパティ(Debug・Release)->VC++ディレクトリ->インクルードディレクトリ
+VC++ディレクトリ->インクルードディレクトリ編集->C:\DirectXTK\lncを追加
+
+自分で追加した方->プロパティ(Debug・Release)->C/C++->コード生成->マルチスレッドデバッグ(/MTd)・マルチスレッド(/MT)
+
+自分で追加した方->プロパティ(Debug・Release)->C/C++->プリコンパイル済みヘッダー->プリコンパイル済みヘッダーを使用しない
+DilectXTK_Desktop_2015->プロパティ(Debug・Release)->C/C++->プリコンパイル済みヘッダー->プリコンパイル済みヘッダーを使用しない
+実行
+
+
+ソースツリー
+
+初期化は、Initializeの一番下に追加
+毎フレームの更新は、Updateの一番下に追加
+描画処理は Clear();とPresent();の間
