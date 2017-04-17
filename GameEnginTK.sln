@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GameEnginTK", "GameEnginTK\GameEnginTK.vcxproj", "{1A01DA68-7171-4F91-80BE-E33CA1AA56F1}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK_Desktop_2015", "..\..\..\..\..\..\DirectXTK\DirectXTK_Desktop_2015.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK_Desktop_2015", "..\..\..\..\..\..\..\DirectXTK\DirectXTK_Desktop_2015.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
