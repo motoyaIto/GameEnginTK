@@ -38,6 +38,7 @@ public:
     void GetDefaultSize( int& width, int& height ) const;
 
 private:
+	using Matrix = DirectX::SimpleMath::Matrix;
 
     void Update(DX::StepTimer const& timer);
     void Render();
@@ -86,6 +87,34 @@ private:
 
 	//地面モデル
 	std::unique_ptr<DirectX::Model> m_modelGround;
+
+	//地面ワールド行列
+	DirectX::SimpleMath::Matrix m_worldGround[100 * 100];
+
 	//天球モデル
 	std::unique_ptr<DirectX::Model> m_modelSkydorme;
+
+
+	//半球モデル
+	std::unique_ptr<DirectX::Model> m_hemisphere;
+
+	//半球ワールド行列
+	int m_worldHemisphereNam;
+	DirectX::SimpleMath::Matrix m_worldHemisphere[20];
+
+	//スケール
+	Matrix scalemat[20];
+	//回転行列
+	//ロール
+	Matrix rotmatZ[20];
+	//ビッチ()
+	Matrix rotmatX[20];
+	//ヨー(方位角)
+	Matrix rotmatY[20];
+	//回転行列の計算
+	Matrix rotmat[20];
+	//平行移動
+	Matrix transmat[20];
+	//回る
+	float m_mawaru;
 };

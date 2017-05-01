@@ -38,5 +38,8 @@
     <MeshContentTask Include="Assets\Skydorm.FBX">
       <Filter>Assets</Filter>
     </MeshContentTask>
+    <MeshContentTask Include="Assets\hemisphere.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
   </ItemGroup>
 </Project>

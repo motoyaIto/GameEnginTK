@@ -18,7 +18,9 @@ Game::Game() :
     m_window(0),
     m_outputWidth(800),
     m_outputHeight(600),
-    m_featureLevel(D3D_FEATURE_LEVEL_9_1)
+    m_featureLevel(D3D_FEATURE_LEVEL_9_1),
+	m_worldHemisphereNam(20),
+	m_mawaru(0)
 {
 }
 
@@ -70,12 +72,16 @@ void Game::Initialize(HWND window, int width, int height)
 	//エフェクトファクトリを作成
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
 	//テクスチャの読み込みパス設定
-	m_factory->SetDirectory(L"");
+	m_factory->SetDirectory(L"Resources");
 	//地面モデルの読み込み
-	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources$ground.cmo", *m_factory);
+	m_modelGround = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/ground.cmo", *m_factory);
 
 	//天球モデルの読み込み
-	m_modelSkydorme = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources$Skydorm.cmo", *m_factory);
+	m_modelSkydorme = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydorm.cmo", *m_factory);
+
+
+	//天球モデルの読み込み
+	m_hemisphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/hemisphere.cmo", *m_factory);
 }
 
 // Executes the basic game loop.
@@ -101,6 +107,67 @@ void Game::Update(DX::StepTimer const& timer)
 
 	//ビュー行列を取得
 	m_view = m_debugCamera->GetCameraMatrix();
+
+	//地面のワールド行列を計算=============================================================
+	for (int i = 0; i < 100 * 100; i++)
+	{
+		//スケール----------------------------------------------------------
+		Matrix scalemat = Matrix::CreateScale(1.0f);
+
+		//回転行列---------------------------------------------------------
+		//ロール
+		Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0));
+
+		//ビッチ()
+		Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(0));
+
+		//ヨー(方位角)
+		Matrix rotmatY = Matrix::CreateRotationY(XMConvertToRadians(0));
+
+		//回転行列の計算
+		Matrix rotmat = rotmatZ * rotmatX * rotmatY;
+
+		//平行移動-------------------------------------------------------------
+		Matrix transmat = Matrix::CreateTranslation(i % 100 - 50, 0.0f, i / 100 - 50);
+
+		//ワールド行列を計算-------------------------------------------------------
+		m_worldGround[i] = scalemat * transmat * rotmat;
+
+	}
+
+	//半球のワールド行列を計算=============================================================
+	m_mawaru+=0.5f;
+	for (int i = 0; i < m_worldHemisphereNam; i++)
+	{
+		//スケール----------------------------------------------------------
+		scalemat[i] = Matrix::CreateScale(1.0f);
+
+		//回転行列---------------------------------------------------------
+		//ロール
+		rotmatZ[i] = Matrix::CreateRotationZ(XMConvertToRadians(0));
+
+		//ビッチ()
+		rotmatX[i] = Matrix::CreateRotationX(XMConvertToRadians(0));
+
+		//ヨー(方位角)
+		if (i < 10)
+		{
+			rotmatY[i] = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i + m_mawaru));
+		}
+		else
+		{
+			rotmatY[i] = Matrix::CreateRotationY(XMConvertToRadians(36.0f * i - m_mawaru));
+		}
+
+		//回転行列の計算
+		rotmat[i] = rotmatZ[i] * rotmatX[i] * rotmatY[i];
+
+		//平行移動-------------------------------------------------------------
+		transmat[i] = Matrix::CreateTranslation(20.0f * ((i / 10) + 1), 0.0f, 0.0f);
+
+		//ワールド行列を計算-------------------------------------------------------
+		m_worldHemisphere[i] = scalemat[i] * transmat[i] * rotmat[i];
+	}
 }
 
 // Draws the scene.
@@ -144,11 +211,19 @@ void Game::Render()
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
 	//地面モデルの描画
-	m_modelGround->Draw(m_d3dContext.Get(), m_states, m_world, m_view, m_proj);
+	for (int i = 0; i < 100 * 100; i++)
+	{
+		m_modelGround->Draw(m_d3dContext.Get(), m_states, m_worldGround[i], m_view, m_proj);
+	}
 
 	//天球モデルの描画
 	m_modelSkydorme->Draw(m_d3dContext.Get(), m_states, m_world, m_view, m_proj);
 
+	//半球モデルの描画
+	for (int i = 0; i < m_worldHemisphereNam; i++)
+	{
+		m_hemisphere->Draw(m_d3dContext.Get(), m_states, m_worldHemisphere[i], m_view, m_proj);
+	}
 	m_batch->Begin();
 
 	//VertexPositionColor v1(Vector3(0.f, 0.5f, 0.5f), Colors::Yellow);
