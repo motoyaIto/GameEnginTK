@@ -11,6 +11,8 @@
 #include <CommonStates.h>
 #include <SimpleMath.h>
 #include <Model.h>
+#include <Keyboard.h>
+
 #include "DebugCamera.h"
 
 // A basic game implementation that creates a D3D11 device and
@@ -88,33 +90,52 @@ private:
 	//地面モデル
 	std::unique_ptr<DirectX::Model> m_modelGround;
 
-	//地面ワールド行列
-	DirectX::SimpleMath::Matrix m_worldGround[100 * 100];
+	//ティーポットモデル
+	/*std::unique_ptr<DirectX::Model> m_teapot;
+	DirectX::SimpleMath::Matrix m_worldTeapot[20];
+	Matrix m_transmat[20];
+	int m_ro;*/
 
-	//天球モデル
+	//頭
+	std::unique_ptr<DirectX::Model> m_hed;
+
+	//地面ワールド行列
+	//DirectX::SimpleMath::Matrix m_worldGround[100 * 100];
+
+	////天球モデル
 	std::unique_ptr<DirectX::Model> m_modelSkydorme;
 
 
-	//半球モデル
-	std::unique_ptr<DirectX::Model> m_hemisphere;
+	////半球モデル
+	//std::unique_ptr<DirectX::Model> m_hemisphere;
 
-	//半球ワールド行列
-	int m_worldHemisphereNam;
-	DirectX::SimpleMath::Matrix m_worldHemisphere[20];
+	////半球ワールド行列
+	//int m_worldHemisphereNam;
+	//DirectX::SimpleMath::Matrix m_worldHemisphere[20];
 
 	//スケール
-	Matrix scalemat[20];
+	//Matrix scalemat[20];
 	//回転行列
 	//ロール
-	Matrix rotmatZ[20];
+	//Matrix rotmatZ[20];
 	//ビッチ()
-	Matrix rotmatX[20];
+	//Matrix rotmatX[20];
 	//ヨー(方位角)
-	Matrix rotmatY[20];
+	//Matrix rotmatY[20];
 	//回転行列の計算
-	Matrix rotmat[20];
+	//Matrix rotmat[20];
 	//平行移動
-	Matrix transmat[20];
+	//Matrix transmat[20];
 	//回る
-	float m_mawaru;
+	//float m_mawaru;
+
+	//キーボード
+	std::unique_ptr<DirectX::Keyboard> keyboard;
+
+	//自機の座標
+	DirectX::SimpleMath::Vector3 tank_pos;
+	//自機の回転
+	float tank_angl;
+	//自機のワールド行列
+	Matrix tank_world;
 };
