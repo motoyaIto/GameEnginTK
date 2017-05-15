@@ -67,7 +67,7 @@ void Game::Initialize(HWND window, int width, int height)
 		m_inputLayout.GetAddressOf());
 
 	//カメラを生成
-	m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth,m_outputHeight);
+	//m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth,m_outputHeight);
 
 	//エフェクトファクトリを作成
 	m_factory = std::make_unique<EffectFactory>(m_d3dDevice.Get());
@@ -98,6 +98,10 @@ void Game::Initialize(HWND window, int width, int height)
 	//キーボード読み込み
 	keyboard = std::make_unique<Keyboard>();
 	tank_angl = 0.0f;
+
+
+	//カメラ-----------------------------------------------------------
+	m_Camera = std::make_unique<Camera>(m_outputWidth, m_outputHeight);
 }
 
 // Executes the basic game loop.
@@ -119,12 +123,34 @@ void Game::Update(DX::StepTimer const& timer)
     // TODO: Add your game logic here.
     elapsedTime;
 	//毎フレームの更新処理を追加
-	m_debugCamera->Update();
+	//m_debugCamera->Update();
 
 	//ビュー行列を取得
-	m_view = m_debugCamera->GetCameraMatrix();
+	//m_view = m_debugCamera->GetCameraMatrix();
 	
+	Vector3 eyepos, refpos;
+
+	refpos = tank_pos + Vector3(0, 2.0f, 0);
+	Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);
+
+	Matrix rotmat = Matrix::CreateRotationY(tank_angl);
+	cameraV = Vector3::TransformNormal(cameraV, rotmat);
+
+	eyepos = refpos + cameraV;
+
+	m_Camera->SetEyePos(eyepos);
+	m_Camera->SetRefPos(refpos);
+
+	//カメラの更新
+	m_Camera->Update();
+	m_view = m_Camera->GetViewMatrix();
+	m_proj = m_Camera->GetProjMatrix();
+
+	//自機にカメラが付いてくる
+	m_Camera->SetEyePos(tank_pos);
+
 	
+	//m_AngleBall += 1.0f;
 	//m_ro++;
 	//for (int i = 0; i < 20; i++)
 	//{
@@ -133,7 +159,7 @@ void Game::Update(DX::StepTimer const& timer)
 
 	//	//回転行列---------------------------------------------------------
 	//	//ロール
-	//	Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0));
+		//Matrix rotmatZ = Matrix::CreateRotationZ(XMConvertToRadians(0));
 
 	//	//ビッチ()
 	//	Matrix rotmatX = Matrix::CreateRotationX(XMConvertToRadians(0));
@@ -254,7 +280,7 @@ void Game::Update(DX::StepTimer const& timer)
 	}
 	
 	{//自機のワールド行列を計算する
-		Matrix rotmat = Matrix::CreateRotationY(XMConvertToRadians(tank_angl));
+		Matrix rotmat = Matrix::CreateRotationY(tank_angl);
 		Matrix transmat = Matrix::CreateTranslation(tank_pos);
 
 		tank_world = rotmat * transmat;
@@ -294,9 +320,9 @@ void Game::Render()
 	m_d3dContext->OMSetDepthStencilState(m_states.DepthNone(), 0);
 	m_d3dContext->RSSetState(m_states.CullNone());
 
+	m_effect->SetWorld(m_world);
 	m_effect->SetView(m_view);
 	m_effect->SetProjection(m_proj);
-	m_effect->SetWorld(m_world);
 
 	m_effect->Apply(m_d3dContext.Get());
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
