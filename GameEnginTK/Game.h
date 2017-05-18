@@ -14,9 +14,8 @@
 #include <Keyboard.h>
 
 #include "DebugCamera.h"
-#include "Camera.h"
+#include "Follow.h"
 
-const float CAMERA_DISTANCE = 5.0f;
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -142,6 +141,7 @@ private:
 	float tank_angl;
 	//自機のワールド行列
 	Matrix tank_world;
+
 	//カメラ
-	std::unique_ptr<Camera>m_Camera;
+	std::unique_ptr<Follow>m_Camera;
 };

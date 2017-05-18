@@ -66,7 +66,7 @@ void Game::Initialize(HWND window, int width, int height)
 		shaderByteCode, byteCodeLength,
 		m_inputLayout.GetAddressOf());
 
-	//カメラを生成
+	//デバックカメラを生成
 	//m_debugCamera = std::make_unique<DebugCamera>(m_outputWidth,m_outputHeight);
 
 	//エフェクトファクトリを作成
@@ -82,7 +82,7 @@ void Game::Initialize(HWND window, int width, int height)
 	//天球モデルの読み込み
 	m_modelSkydorme = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/Skydorm.cmo", *m_factory);
 
-	//ティーポットのワールド行列を計算=============================================================
+	//ティーポットのワールド行列を計算-----------------------------------------------------------
 	/*for (int i = 0; i < 20; i++)
 	{
 		float rota = rand() % 360;
@@ -90,8 +90,6 @@ void Game::Initialize(HWND window, int width, int height)
 		m_transmat[i] = Matrix::CreateTranslation(cosf(rota) * kyori, 0.0f, sinf(rota) * kyori);
 	}*/
 	
-	//天球モデルの読み込み
-	//m_hemisphere = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/hemisphere.cmo", *m_factory);
 
 	//頭の読み込み
 	m_hed = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/hed.cmo", *m_factory);
@@ -101,7 +99,7 @@ void Game::Initialize(HWND window, int width, int height)
 
 
 	//カメラ-----------------------------------------------------------
-	m_Camera = std::make_unique<Camera>(m_outputWidth, m_outputHeight);
+	m_Camera = std::make_unique<Follow>(m_outputWidth, m_outputHeight);
 }
 
 // Executes the basic game loop.
@@ -127,20 +125,12 @@ void Game::Update(DX::StepTimer const& timer)
 
 	//ビュー行列を取得
 	//m_view = m_debugCamera->GetCameraMatrix();
+
+
+	//自機を追従するカメラ==============================================
+	m_Camera->SetTargetPos(tank_pos);
+	m_Camera->SettargetAngle(tank_angl);
 	
-	Vector3 eyepos, refpos;
-
-	refpos = tank_pos + Vector3(0, 2.0f, 0);
-	Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);
-
-	Matrix rotmat = Matrix::CreateRotationY(tank_angl);
-	cameraV = Vector3::TransformNormal(cameraV, rotmat);
-
-	eyepos = refpos + cameraV;
-
-	m_Camera->SetEyePos(eyepos);
-	m_Camera->SetRefPos(refpos);
-
 	//カメラの更新
 	m_Camera->Update();
 	m_view = m_Camera->GetViewMatrix();
@@ -273,7 +263,7 @@ void Game::Update(DX::StepTimer const& timer)
 		Vector3 moveV(0, 0, 0.1f);
 
 		//移動量ベクトルを自機の角度分回転させる
-		moveV = SimpleMath::Vector3::TransformNormal(moveV, tank_world);
+		moveV = Vector3::TransformNormal(moveV, tank_world);
 
 		//自機の移動
 		tank_pos += moveV;

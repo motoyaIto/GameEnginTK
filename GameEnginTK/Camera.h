@@ -33,7 +33,7 @@ public:
 	Camera(int outputWidth, int outputHeight);
 	virtual ~Camera();
 
-	void Update();
+	virtual void Update();
 
 	const Matrix& GetViewMatrix();//ビュー行列の取得
 	const Matrix& GetProjMatrix();//プロジェクション行列の取得
