@@ -8,11 +8,11 @@
 
 class Camera
 {
-private:
+protected:
 	using Matrix = DirectX::SimpleMath::Matrix;
 	using Vector3 = DirectX::SimpleMath::Vector3;
 
-protected:
+
 	//ƒrƒ…[s—ñ-------------------------------------
 	Matrix m_view;
 

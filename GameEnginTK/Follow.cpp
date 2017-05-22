@@ -16,6 +16,8 @@ Follow::Follow(int outputWidth, int outputHeight)
 	: Camera(outputWidth, outputHeight)
 
 	, m_target_pos(Vector3::Zero), m_target_angle(0.0f)
+
+	, m_keyboard(nullptr), cameraMode(false)
 {
 
 }
@@ -32,20 +34,64 @@ Follow::~Follow()
 //---------------------------------------------------------------
 void Follow::Update()
 {
-	Vector3 eyepos, refpos;//視点, 参照点
+	//キーボードの状態を取得
+	Keyboard::State keyboardstate = m_keyboard->GetState();
+	m_keyboadTraker.Update(keyboardstate);
 
-	refpos = m_target_pos + Vector3(0, 2.0f, 0);//自機の2m上を参照する
-	Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);//参照点と視点の差分ベクトル
+	//cキーを押すことにFPS/TPSを切り替え
+	if (m_keyboadTraker.IsKeyPressed(Keyboard::Keys::C))
+	{
+		cameraMode = !cameraMode;
+	}
 
-	Matrix rotmat = Matrix::CreateRotationY(m_target_angle);//自機の後ろに回り込むための回転行列
-	cameraV = Vector3::TransformNormal(cameraV, rotmat);//差分テクトルを回転させる
+	if (cameraMode == false)
+	{
+		//TPS----------------------------------------------------------------------------------
+		Vector3 eyepos, refpos;//視点, 参照点
 
-	eyepos = refpos + cameraV;//視点を計算
+		refpos = m_target_pos + Vector3(0, 2.0f, 0);//自機の2m上を参照する
+		Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);//参照点と視点の差分ベクトル
 
-	Camera::SetEyePos(eyepos);
-	Camera::SetRefPos(refpos);
+		Matrix rotmat = Matrix::CreateRotationY(m_target_angle);//自機の後ろに回り込むための回転行列
+		cameraV = Vector3::TransformNormal(cameraV, rotmat);//差分テクトルを回転させる
 
-	Camera::Update();//基底クラスの更新
+		eyepos = refpos + cameraV;//視点を計算
+
+		////視点を現在位置から補間する
+		eyepos = m_eyepos + (eyepos - m_eyepos) * 0.05f;
+		////参照点を現在位置から補間する
+		refpos = m_refpos + (refpos - m_refpos) * 0.05f;
+
+
+		Camera::SetEyePos(eyepos);
+		Camera::SetRefPos(refpos);
+
+		Camera::Update();//基底クラスの更新
+	}
+	else
+	{
+		//FPS-------------------------------------------------------------------------------
+		Vector3 eyepos, refpos;//視点, 参照点
+
+		refpos = m_target_pos + Vector3(0, 2.0f, 0);//自機の2m上を参照する
+		Vector3 cameraV(0.0f, 0.0f, CAMERA_DISTANCE);//参照点と視点の差分ベクトル
+
+		Matrix rotmat = Matrix::CreateRotationY(m_target_angle);//自機の後ろに回り込むための回転行列
+		cameraV = Vector3::TransformNormal(cameraV, rotmat);//差分テクトルを回転させる
+
+		eyepos = refpos + cameraV;//視点を計算
+
+		//視点を現在位置から補間する
+		eyepos = m_eyepos + (eyepos - m_eyepos) * 0.05f;
+		//参照点を現在位置から補間する
+		refpos = m_refpos + (refpos - m_refpos) * 0.05f;
+
+
+		Camera::SetEyePos(eyepos);
+		Camera::SetRefPos(refpos);
+
+		Camera::Update();//基底クラスの更新
+	}
 }
 
 //---------------------------------------------------------------
@@ -62,4 +108,12 @@ void Follow::SetTargetPos(const Vector3 & target_pos)
 void Follow::SettargetAngle(float target_angle)
 {
 	m_target_angle = target_angle;
+}
+
+//---------------------------------------------------------------
+//キーボードを取得
+//---------------------------------------------------------------
+void Follow::setKeyboard(DirectX::Keyboard * keyboard)
+{
+	m_keyboard = keyboard;
 }

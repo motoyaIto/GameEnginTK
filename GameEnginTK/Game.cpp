@@ -100,6 +100,7 @@ void Game::Initialize(HWND window, int width, int height)
 
 	//カメラ-----------------------------------------------------------
 	m_Camera = std::make_unique<Follow>(m_outputWidth, m_outputHeight);
+	m_Camera->setKeyboard(keyboard.get());
 }
 
 // Executes the basic game loop.
@@ -137,7 +138,7 @@ void Game::Update(DX::StepTimer const& timer)
 	m_proj = m_Camera->GetProjMatrix();
 
 	//自機にカメラが付いてくる
-	m_Camera->SetEyePos(tank_pos);
+	//m_Camera->SetEyePos(tank_pos);
 
 	
 	//m_AngleBall += 1.0f;
@@ -235,12 +236,12 @@ void Game::Update(DX::StepTimer const& timer)
 	//ヨー(方位角)
 	if (g_key.A)
 	{
-		tank_angl += 0.1f;
+		tank_angl += 0.05f;
 	}
 
 	if (g_key.D)
 	{
-		tank_angl -= 0.1f;
+		tank_angl -= 0.05f;
 	}
 
 

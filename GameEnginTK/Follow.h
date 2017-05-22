@@ -3,18 +3,19 @@
 //==============================================================
 #pragma once
 
+#include <windows.h>
+#include <Keyboard.h>
 #include "Camera.h"
 
 class Follow : public Camera
 {
-private:
-	using Vector3 = DirectX::SimpleMath::Vector3;
-	using Matrix = DirectX::SimpleMath::Matrix;
-
+protected:
 	Vector3 m_target_pos;//追従対象の座標
 	float m_target_angle;//追従対象の回転角
 
-
+	DirectX::Keyboard* m_keyboard;								//キーボード
+	DirectX::Keyboard::KeyboardStateTracker m_keyboadTraker;	//キーボードトラッカー
+	bool cameraMode;
 
 public:
 	static const float CAMERA_DISTANCE;//追従対象との距離
@@ -27,5 +28,6 @@ public:
 
 	void SetTargetPos(const Vector3& target_pos);	//追従対象の座標を取得
 	void SettargetAngle(float target_angle);		//追従対象の回転角を取得
+	void setKeyboard(DirectX::Keyboard* keyboard);	//キーボードを取得
 
 };
