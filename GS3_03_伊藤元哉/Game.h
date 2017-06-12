@@ -16,14 +16,23 @@
 #include "DebugCamera.h"
 #include "Follow.h"
 #include "Obj3d.h"
-#include "Player.h"
-#include "Enemy.h"
+
+
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
 class Game
 {
 public:
-	
+	enum PLAYER_PARTS
+	{
+		PLAYER_PARTS_TANK,
+		PLAYER_PARTS_BODE,
+		PLAYER_PARTS_RIGHTARM,
+		PLAYER_PARTS_LEFTARM,
+		PLAYER_PARTS_HED,
+
+		PLAYER_PARTS_NUM
+	};
     Game();
 	
     // Initialization and management
@@ -143,11 +152,9 @@ private:
 	Matrix tank_world2;
 
 	//自機の3Dオブジェクト
-	Player* m_objPlayer;
+	std::vector<Obj3d> m_objPlayer;
 
+	//std::Vector<Obj3d> m_objPlayer;
+	//カメラ
 	std::unique_ptr<Follow>m_Camera;
-
-	//敵
-	std::vector<std::unique_ptr<Enemy>> m_Enemy;
-
 };

@@ -13,6 +13,9 @@
     <ClInclude Include="DebugCamera.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Follow.h" />
+    <ClInclude Include="Obj3d.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Enemy.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -21,6 +24,9 @@
     <ClCompile Include="DebugCamera.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Follow.cpp" />
+    <ClCompile Include="Obj3d.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Enemy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
@@ -52,6 +58,18 @@
       <Filter>Assets</Filter>
     </MeshContentTask>
     <MeshContentTask Include="Assets\hed.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="Assets\tank.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="Assets\rightArm.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="Assets\leftArm.FBX">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
+    <MeshContentTask Include="Assets\bode.FBX">
       <Filter>Assets</Filter>
     </MeshContentTask>
   </ItemGroup>

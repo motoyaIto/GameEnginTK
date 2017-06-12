@@ -92,24 +92,34 @@ void Game::Initialize(HWND window, int width, int height)
 	//天球モデルの読み込み
 	m_objSkydorme.LoadModel(L"Resources/Skydorm.cmo");
 
+	//頭の読み込み
+	//m_hed = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/hed.cmo", *m_factory);
+
+	//頭の読み込み
+	//m_hed2 = Model::CreateFromCMO(m_d3dDevice.Get(), L"Resources/hed.cmo", *m_factory);
 	
-	//自機
-	m_objPlayer = new Player();
-	m_objPlayer->Initialize(keyboard.get());
-	//tank_angl = 0.0f;
+	
+	//自機パーツを読み込む
+	m_objPlayer.resize(PLAYER_PARTS_NUM);
+	m_objPlayer[PLAYER_PARTS_TANK].LoadModel(L"Resources/tank.cmo");
+	m_objPlayer[PLAYER_PARTS_BODE].LoadModel(L"Resources/bode.cmo");
+	m_objPlayer[PLAYER_PARTS_RIGHTARM].LoadModel(L"Resources/rightArm.cmo");
+	m_objPlayer[PLAYER_PARTS_LEFTARM].LoadModel(L"Resources/leftArm.cmo");
+	m_objPlayer[PLAYER_PARTS_HED].LoadModel(L"Resources/hed.cmo");
 
-	//カメラにプレイヤーの情報を渡す
-	m_Camera->SetPlayer(m_objPlayer);
+	//パーツの親子関係
+	m_objPlayer[PLAYER_PARTS_HED].SetParent(&m_objPlayer[PLAYER_PARTS_BODE]);
+	m_objPlayer[PLAYER_PARTS_RIGHTARM].SetParent(&m_objPlayer[PLAYER_PARTS_BODE]);
+	m_objPlayer[PLAYER_PARTS_LEFTARM].SetParent(&m_objPlayer[PLAYER_PARTS_BODE]);
 
-	int enemyMum = rand() / 10 + 1;
-	m_Enemy.resize(enemyMum);
-	//敵
-	for (int i = 0; i < enemyMum; i++)
-	{
-		m_Enemy[i] = std::make_unique<Enemy>(keyboard.get());
+	m_objPlayer[PLAYER_PARTS_BODE].SetParent(&m_objPlayer[PLAYER_PARTS_TANK]);
 
-		m_Enemy[i]->Initialize();
-	}
+	//親からの座標
+	m_objPlayer[PLAYER_PARTS_BODE].SetTranslation(Vector3(0, 0.3, 0));
+	m_objPlayer[PLAYER_PARTS_RIGHTARM].SetTranslation(Vector3(0.5, 0.85, 0));
+	m_objPlayer[PLAYER_PARTS_LEFTARM].SetTranslation(Vector3(-0.5, 0.85, 0));
+	m_objPlayer[PLAYER_PARTS_HED].SetTranslation(Vector3( 0, 1, 0));
+	tank_angl = 0.0f;
 }
 
 // Executes the basic game loop.
@@ -126,16 +136,21 @@ void Game::Tick()
 // Updates the world.
 void Game::Update(DX::StepTimer const& timer)
 {
-	float elapsedTime = float(timer.GetElapsedSeconds());
+    float elapsedTime = float(timer.GetElapsedSeconds());
 
-	// TODO: Add your game logic here.
-	elapsedTime;
+    // TODO: Add your game logic here.
+    elapsedTime;
 	//毎フレームの更新処理を追加
 	//m_debugCamera->Update();
 
 	//ビュー行列を取得
-	//m_view = m_debugCamera->GetCameraMatrix();	
+	//m_view = m_debugCamera->GetCameraMatrix();
 
+
+	//自機を追従するカメラ==============================================
+	m_Camera->SetTargetPos(m_objPlayer[PLAYER_PARTS_TANK].GetTranslation()); 
+	m_Camera->SettargetAngle(m_objPlayer[PLAYER_PARTS_TANK].GetRotation().y);
+	
 	//カメラの更新
 	m_Camera->Update();
 	m_view = m_Camera->GetViewMatrix();
@@ -147,7 +162,7 @@ void Game::Update(DX::StepTimer const& timer)
 	//自機にカメラが付いてくる
 	//m_Camera->SetEyePos(tank_pos);
 
-
+	
 	//m_AngleBall += 1.0f;
 	//m_ro++;
 	//for (int i = 0; i < 20; i++)
@@ -237,10 +252,98 @@ void Game::Update(DX::StepTimer const& timer)
 	//	m_worldHemisphere[i] = scalemat[i] * transmat[i] * rotmat[i];
 	//}
 
-
+	Keyboard::State g_key = keyboard->GetState();
 
 	//機体制御=======================================================
+	//機体角度------------------------------------------------------
+	//ヨー(方位角)
+	if (g_key.A)
+	{
+		//tank_angl += 0.05f;
+		float angle = m_objPlayer[0].GetRotation().y;
+		m_objPlayer[0].SetRotation(Vector3(0, angle + 0.03f, 0));
+	}
 
+	if (g_key.D)
+	{
+		//tank_angl -= 0.05f;
+		float angle = m_objPlayer[0].GetRotation().y;
+		m_objPlayer[0].SetRotation(Vector3(Vector3(0, angle - 0.03f, 0)));
+	}
+
+
+	//前進後進------------------------------------------------------
+	if (g_key.W)
+	{
+		//移動量を入力
+		Vector3 moveV(0, 0, -0.1f);
+
+		//移動量ベクトルを自機の角度分回転させる
+		//moveV = SimpleMath::Vector3::TransformNormal(moveV, tank_world);
+		
+		float angle = m_objPlayer[0].GetRotation().y;
+		Matrix rotmat = Matrix::CreateRotationY(angle);
+		moveV = Vector3::TransformNormal(moveV, rotmat);
+
+		//自機の移動
+		Vector3 pos = m_objPlayer[0].GetTranslation();
+		m_objPlayer[0].SetTranslation(pos + moveV);
+	}
+
+	if (g_key.S)
+	{
+		//移動量を入力
+		Vector3 moveV(0, 0, 0.1f);
+
+		//移動量ベクトルを自機の角度分回転させる
+		//moveV = Vector3::TransformNormal(moveV, tank_world);
+
+		float angle = m_objPlayer[0].GetRotation().y;
+		Matrix rotmat = Matrix::CreateRotationY(angle);
+		moveV = Vector3::TransformNormal(moveV, rotmat);
+
+		//自機の移動
+		Vector3 pos = m_objPlayer[0].GetTranslation();
+		m_objPlayer[0].SetTranslation(pos + moveV);
+	}
+
+	//左腕-----------------------------------------------------------
+	if (g_key.Q)
+	{
+		float angle = m_objPlayer[3].GetRotation().x;
+		if (angle <= XMConvertToRadians(45))
+		{
+			m_objPlayer[3].SetRotation(Vector3(angle + 0.03f, 0, 0));
+		}
+	}
+
+	if (g_key.Z)
+	{
+		float angle = m_objPlayer[3].GetRotation().x;
+		if (angle >= XMConvertToRadians(-45))
+		{
+			m_objPlayer[3].SetRotation(Vector3(angle - 0.03f, 0, 0));
+		}
+	}
+
+	//右腕-----------------------------------------------------------
+	if (g_key.E)
+	{
+		float angle = m_objPlayer[2].GetRotation().x;
+		if (angle <= XMConvertToRadians(45))
+		{
+			m_objPlayer[2].SetRotation(Vector3(angle + 0.03f, 0, 0));
+		}
+	}
+
+	if (g_key.C)
+	{
+		float angle = m_objPlayer[2].GetRotation().x;
+		if (angle >= XMConvertToRadians(-45))
+		{
+			m_objPlayer[2].SetRotation(Vector3(angle - 0.03f, 0, 0));
+		}
+	}
 	//
 	//{//自機のワールド行列を計算する
 	//	Matrix rotmat = Matrix::CreateRotationY(tank_angl);
@@ -256,16 +359,10 @@ void Game::Update(DX::StepTimer const& timer)
 	//	tank_world2 = rotmat2 * transmat2 * tank_world;
 	//}
 
-	m_objPlayer->Update();
-
-	//敵
-	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemy.begin();
-		it != m_Enemy.end();
-		it++)
+	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end(); it++)
 	{
-		(*it)->Update();
+		it->Update();
 	}
-
 }
 
 // Draws the scene.
@@ -332,19 +429,16 @@ void Game::Render()
 	//m_batch->DrawIndexed(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
 
 
-	m_objPlayer->Draw();
-
-	//敵
-	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemy.begin();it != m_Enemy.end();it++)
+	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end(); it++)
 	{
-		(*it)->Draw();
+		it->Draw();
 	}
 	//m_batch->Begin();
 
-	/*VertexPositionColor v1(Vector3(0.0f, 0.5f, 0.5f), Colors::Yellow);
+	VertexPositionColor v1(Vector3(0.0f, 0.5f, 0.5f), Colors::Yellow);
 	VertexPositionColor v2(Vector3(0.0f, -0.5f, 0.5f), Colors::Yellow);
 	VertexPositionColor v3(Vector3(0.0f, -0.5f, 0.5f), Colors::Yellow);
-*/
+
 	//m_batch->DrawIndexed(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
 	//m_batch->End();
 
