@@ -40,6 +40,16 @@ Player::Player()
 void Player::Initialize(Keyboard* keyboard)
 {
 	m_keyboard = keyboard;
+
+	{//弾丸用のあたり判定の設定
+		m_collisiorNodeBullet.Initialize();
+
+		m_collisiorNodeBullet.SetParent(&m_objPlayer[PLAYER_PARTS_RIGHTARM]);
+		m_collisiorNodeBullet.SetTrans(Vector3(0.f, 0.f, -0.7f));
+		m_collisiorNodeBullet.setLocalRadius(0.3f);
+	}
+
+
 }
 //---------------------------------------------------------------
 //アップデート
@@ -116,23 +126,26 @@ void Player::Update()
 
 	
 		//右腕-----------------------------------------------------------
-		if (g_key.E)
+		if (!m_risetFlag)
 		{
-			float angle = m_objPlayer[2].GetRotation().x;
-
-			if (angle <= XMConvertToRadians(45))
+			if (g_key.E)
 			{
-				m_objPlayer[2].SetRotation(Vector3(angle + 0.03f, 0, 0));
+				float angle = m_objPlayer[2].GetRotation().x;
+
+				if (angle <= XMConvertToRadians(45))
+				{
+					m_objPlayer[2].SetRotation(Vector3(angle + 0.03f, 0, 0));
+				}
 			}
-		}
 
-		if (g_key.C)
-		{
-			float angle = m_objPlayer[2].GetRotation().x;
-
-			if (angle >= XMConvertToRadians(-45))
+			if (g_key.C)
 			{
-				m_objPlayer[2].SetRotation(Vector3(angle - 0.03f, 0, 0));
+				float angle = m_objPlayer[2].GetRotation().x;
+
+				if (angle >= XMConvertToRadians(-45))
+				{
+					m_objPlayer[2].SetRotation(Vector3(angle - 0.03f, 0, 0));
+				}
 			}
 		}
 	
@@ -168,6 +181,8 @@ void Player::Draw()
 	{
 		it->Draw();
 	}
+
+	m_collisiorNodeBullet.Draw();
 }
 
 Vector3 Player::GetTranslation()
@@ -231,4 +246,7 @@ void Player::Calc()
 	{
 		m_objPlayer[i].Update();
 	}
+
+	//更新
+	m_collisiorNodeBullet.Update();
 }

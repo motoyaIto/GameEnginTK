@@ -58,6 +58,14 @@ void Enemy::Initialize()
 	m_Timer = 0;
 	m_DistAngle = 0;
 	//m_objEnemy[ENEMY_PARTS_TANK].SetTranslation(pos);
+
+	{//’eŠÛ—p‚Ì‚ ‚½‚è”»’è‚ÌÝ’è
+		m_collisionNodeBody.Initialize();
+
+		m_collisionNodeBody.SetParent(&m_objEnemy[ENEMY_PARTS_BODE]);
+		m_collisionNodeBody.SetTrans(Vector3(0.f, 0.5f, 0.0f));
+		m_collisionNodeBody.setLocalRadius(1.0f);
+	}
 }
 
 //---------------------------------------------------------------
@@ -149,6 +157,9 @@ void Enemy::Update()
 	}
 
 	Calc();
+
+	//XV
+	m_collisionNodeBody.Update();
 }
 
 void Enemy::Calc()
@@ -173,6 +184,8 @@ void Enemy::Draw()
 	{
 		it->Draw();
 	}
+
+	m_collisionNodeBody.Draw();
 }
 
 const DirectX::SimpleMath::Vector3 & Enemy::GetTrans()

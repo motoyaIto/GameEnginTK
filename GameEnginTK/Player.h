@@ -10,6 +10,8 @@
 #include <SimpleMath.h>
 #include "Obj3d.h"
 
+#include "CollisionNode.h"
+
 class Camera;
 
 
@@ -26,6 +28,9 @@ private:
 	DirectX::SimpleMath::Vector3 m_BulletVel;
 
 	bool m_risetFlag;
+
+	//’eŠÛ—p‚Ì‚ ‚½‚è”»’è
+	SoherNode m_collisiorNodeBullet;
 public:
 	enum PLAYER_PARTS
 	{
@@ -59,4 +64,6 @@ public:
 	void RsetFireBull();
 
 	void Calc();
+
+	const SoherNode& GetCollisionNodeBullet() { return m_collisiorNodeBullet; }
 };

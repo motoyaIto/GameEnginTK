@@ -9,6 +9,8 @@
 #include <vector>
 #include "Obj3d.h"
 
+#include "CollisionNode.h"
+
 class Camera;
 
 
@@ -29,6 +31,10 @@ private:
 	int m_Timer;
 	// 目標の角度
 	float m_DistAngle;
+
+	//弾丸用のあたり判定
+	//SoherNode m_collisiorNode;
+	SoherNode m_collisionNodeBody;
 public:	
 	enum ENEMY_PARTS
 	{
@@ -58,4 +64,8 @@ public:
 	void SetRot(const DirectX::SimpleMath::Vector3& rot);
 	// ワールド行列を取得
 	const DirectX::SimpleMath::Matrix& GetLocalWorld();
+
+	//const SoherNode& GetCollisionNode() { return m_collisiorNode; }
+
+	const SoherNode& GetCollisionNodeBody() { return m_collisionNodeBody; }
 };
