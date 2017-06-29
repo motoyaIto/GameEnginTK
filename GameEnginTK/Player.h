@@ -53,7 +53,7 @@ public:
 
 	void Initialize(DirectX::Keyboard* keyboard);
 	void Update();
-	void Draw();
+	void Draw(bool debug);
 
 	Vector3 GetTranslation();
 	Vector3 GetRotation();

@@ -4,6 +4,8 @@
 
 #include "pch.h"
 #include "Game.h"
+#include "ModelEffect.h"
+#include <WICTextureLoader.h>
 
 extern void ExitGame();
 
@@ -19,7 +21,6 @@ Game::Game() :
     m_outputWidth(800),
     m_outputHeight(600),
     m_featureLevel(D3D_FEATURE_LEVEL_9_1)
-	
 	
 {
 }
@@ -110,6 +111,10 @@ void Game::Initialize(HWND window, int width, int height)
 
 		m_Enemy[i]->Initialize();
 	}
+
+	m_killEnemy = 0;
+
+	debugMode = false;
 }
 
 // Executes the basic game loop.
@@ -143,6 +148,17 @@ void Game::Update(DX::StepTimer const& timer)
 
 	//オブジェクトの更新====================================================
 	m_objSkydorme.Update();
+	ModelEffectManager::getInstance()->Update();
+
+	//デバックモードの切り替え
+	//キーボードの状態を取得
+	Keyboard::State keyboardstate = keyboard->GetState();
+	m_keyboadTraker.Update(keyboardstate);
+	
+	if (m_keyboadTraker.IsKeyPressed(Keyboard::Keys::D1))
+	{
+		debugMode = !debugMode;
+	}
 
 	//自機にカメラが付いてくる
 	//m_Camera->SetEyePos(tank_pos);
@@ -277,14 +293,35 @@ void Game::Update(DX::StepTimer const& timer)
 		{
 			Enemy* enemy = it->get();
 
+			
 			//敵の判定球の取得
 			const Sphere& enemySphere = enemy->GetCollisionNodeBody();
 
 			//球と敵が当たっていたら
 			if (ChecksSphere2Sphere(bulletSphere, enemySphere))
 			{
+				Vector3 trans = enemy->GetTrans();
+				m_killEnemy++;
+				
+
+				//m_explode.SetRotation(it->get()->GetRot());
+				ModelEffectManager::getInstance()->Entry(
+					L"Resources/explode.cmo",	// モデルファイル
+					10,	// 寿命フレーム数
+					Vector3(trans),	// ワールド座標
+					Vector3(0, 0, 0),	// 速度
+					Vector3(0, 0, 0),	// 加速度
+					Vector3(0, 0, 0),	// 回転角（初期）
+					Vector3(0, 0, 0),	// 回転角（最終）
+					Vector3(0, 0, 0),	// スケール（初期）
+					Vector3(6, 6, 6)	// スケール（最終）
+				);
+
+				
+
 				//敵を殺す
 				it = m_Enemy.erase(it);//ereaseした要素の次の要素を指すイテレータ
+
 			}
 			else
 			{
@@ -294,6 +331,7 @@ void Game::Update(DX::StepTimer const& timer)
 		}
 	}
 
+	
 }
 
 // Draws the scene.
@@ -360,12 +398,12 @@ void Game::Render()
 	//m_batch->DrawIndexed(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
 
 
-	m_objPlayer->Draw();
+	m_objPlayer->Draw(debugMode);
 
 	//敵
 	for (std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemy.begin();it != m_Enemy.end();it++)
 	{
-		(*it)->Draw();
+		(*it)->Draw(debugMode);
 	}
 	//m_batch->Begin();
 
@@ -375,7 +413,18 @@ void Game::Render()
 */
 	//m_batch->DrawIndexed(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, indices, 6, vertices, 4);
 	//m_batch->End();
+	ModelEffectManager::getInstance()->Draw();
 
+	//std::vector<std::unique_ptr<Enemy>>::iterator it = m_Enemy.begin();
+	if (m_Enemy.size() == 0)
+	{
+		m_spriteBatch->Begin(SpriteSortMode_Deferred, m_states.NonPremultiplied());
+
+		m_spriteBatch->Draw(m_texture.Get(), m_screenPos, nullptr, Colors::White,
+			0.f, m_origin);
+
+		m_spriteBatch->End();
+	}
     Present();
 }
 
@@ -535,6 +584,30 @@ void Game::CreateDevice()
         (void)m_d3dContext.As(&m_d3dContext1);
 
     // TODO: Initialize device dependent objects here (independent of window size).
+	//クリア画像の読み込み
+	DX::ThrowIfFailed(
+		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Assets//clear.png", nullptr,
+			m_texture.ReleaseAndGetAddressOf()));
+
+	//クリア描画
+	m_spriteBatch = std::make_unique<SpriteBatch>(m_d3dContext.Get());
+
+	ComPtr<ID3D11Resource> resource;
+	DX::ThrowIfFailed(
+		CreateWICTextureFromFile(m_d3dDevice.Get(), L"Assets//clear.png",
+			resource.GetAddressOf(),
+			m_texture.ReleaseAndGetAddressOf()));
+
+	ComPtr<ID3D11Texture2D> cat;
+	DX::ThrowIfFailed(resource.As(&cat));
+
+	CD3D11_TEXTURE2D_DESC catDesc;
+	cat->GetDesc(&catDesc);
+
+	m_origin.x = float(catDesc.Width / 2);
+	m_origin.y = float(catDesc.Height / 2);
+
+	m_states = std::make_unique<CommonStates>(m_d3dDevice.Get());
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -654,11 +727,18 @@ void Game::CreateResources()
     DX::ThrowIfFailed(m_d3dDevice->CreateDepthStencilView(depthStencil.Get(), &depthStencilViewDesc, m_depthStencilView.ReleaseAndGetAddressOf()));
 
     // TODO: Initialize windows-size dependent objects here.
+	//クリア
+	m_screenPos.x = backBufferWidth / 2.f;
+	m_screenPos.y = backBufferHeight / 2.f;
 }
 
 void Game::OnDeviceLost()
 {
     // TODO: Add Direct3D resource cleanup here.
+	m_states.reset();
+	m_spriteBatch.reset();
+	//テクスチャーハンドルの破棄
+	m_texture.Reset();
 
     m_depthStencilView.Reset();
     m_renderTargetView.Reset();

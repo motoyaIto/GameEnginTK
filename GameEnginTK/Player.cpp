@@ -175,14 +175,17 @@ void Player::Update()
 //---------------------------------------------------------------
 //ï`âÊ
 //---------------------------------------------------------------
-void Player::Draw()
+void Player::Draw(bool debug)
 {
 	for (std::vector<Obj3d>::iterator it = m_objPlayer.begin(); it != m_objPlayer.end(); it++)
 	{
 		it->Draw();
 	}
 
-	m_collisiorNodeBullet.Draw();
+	if (debug)
+	{
+		m_collisiorNodeBullet.Draw();
+	}
 }
 
 Vector3 Player::GetTranslation()
@@ -220,7 +223,7 @@ void Player::FireBull()
 	m_objPlayer[PLAYER_PARTS_RIGHTARM].SetTranslation(translation);
 
 	//íeä€ÇÃë¨ìxÇê›íË
-	m_BulletVel = Vector3(0, 0, -0.1f);
+	m_BulletVel = Vector3(0, 0, -0.3f);
 	m_BulletVel = Vector3::Transform(m_BulletVel, rotation);
 
 	m_risetFlag = true;

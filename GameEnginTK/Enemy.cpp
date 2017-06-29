@@ -50,8 +50,8 @@ void Enemy::Initialize()
 
 	//初期位置
 	Vector3 pos;
-	pos.x = rand() % 10;
-	pos.y = rand() % 10;
+	pos.x = rand() % 10 + 10;
+	//pos.y = rand() % 10;
 
 	this->SetTrans(pos);
 
@@ -119,42 +119,17 @@ void Enemy::Update()
 		m_DistAngle += rnd;
 	}
 
+	if (hypot(m_objEnemy[0].GetTranslation().z, m_objEnemy[0].GetTranslation().x) >= 100)
 	{
-		// 自機の角度を回転させる
-		Vector3 rotv = m_objEnemy[0].GetRotation();
-
-		float angle = m_DistAngle - rotv.y;
-
-		// 180度を超えていた場合、逆回りの方が近い
-		if (angle > XM_PI)
-		{
-			angle -= XM_2PI;
-		}
-
-		if (angle < -XM_PI)
-		{
-			angle += XM_2PI;
-		}
-
-		// 補間
-		rotv.y += angle * 0.05f;
-
-		SetRot(rotv);
+		m_DistAngle = atan2f(-m_objEnemy[0].GetTranslation().x, -m_objEnemy[0].GetTranslation().z) + 180;
 	}
+	//回転角を決める
+	this->moveRotation();
 
 	// 機体が向いている方向に進む
-	{
-		// 移動量のベクトル
-		Vector3 moveV(0, 0, -0.1f);
-		// 移動量ベクトルを自機の角度分回転させる
-		//moveV = Vector3::TransformNormal(moveV, tank_world);
-		float angle = m_objEnemy[0].GetRotation().y;
-		Matrix rotmat = Matrix::CreateRotationY(angle);
-		moveV = Vector3::TransformNormal(moveV, rotmat);
-		// 自機の座標を移動させる
-		Vector3 pos = m_objEnemy[0].GetTranslation();
-		m_objEnemy[0].SetTranslation(pos + moveV);
-	}
+	this->moveransform();
+	
+	
 
 	Calc();
 
@@ -176,7 +151,7 @@ void Enemy::Calc()
 //---------------------------------------------------------------
 //描画
 //---------------------------------------------------------------
-void Enemy::Draw()
+void Enemy::Draw(bool debug)
 {
 	for (std::vector<Obj3d>::iterator it = m_objEnemy.begin();
 		it != m_objEnemy.end();
@@ -185,7 +160,10 @@ void Enemy::Draw()
 		it->Draw();
 	}
 
-	m_collisionNodeBody.Draw();
+	if (debug == true)
+	{
+		m_collisionNodeBody.Draw();
+	}
 }
 
 const DirectX::SimpleMath::Vector3 & Enemy::GetTrans()
@@ -214,4 +192,43 @@ const DirectX::SimpleMath::Matrix & Enemy::GetLocalWorld()
 {
 	// TODO: return ステートメントをここに挿入します
 	return m_objEnemy[0].GetWorld();
+}
+
+void Enemy::moveRotation()
+{
+	// 自機の角度を回転させる
+	Vector3 rotv = m_objEnemy[0].GetRotation();
+
+	float angle = m_DistAngle - rotv.y;
+
+	// 180度を超えていた場合、逆回りの方が近い
+	if (angle > XM_PI)
+	{
+		angle -= XM_2PI;
+	}
+
+	if (angle < -XM_PI)
+	{
+		angle += XM_2PI;
+	}
+
+	// 補間
+	rotv.y += angle * 0.05f;
+
+	SetRot(rotv);
+}
+
+void Enemy::moveransform()
+{
+	// 移動量のベクトル
+	Vector3 moveV(0, 0, -0.1f);
+	// 移動量ベクトルを自機の角度分回転させる
+	//moveV = Vector3::TransformNormal(moveV, tank_world);
+	float angle = m_objEnemy[0].GetRotation().y;
+	Matrix rotmat = Matrix::CreateRotationY(angle);
+	moveV = Vector3::TransformNormal(moveV, rotmat);
+	// 自機の座標を移動させる
+	Vector3 pos = m_objEnemy[0].GetTranslation();
+
+	m_objEnemy[0].SetTranslation(pos + moveV);
 }

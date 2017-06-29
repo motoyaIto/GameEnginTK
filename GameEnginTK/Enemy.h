@@ -52,7 +52,7 @@ public:
 	void Initialize();
 	void Update();
 	void Calc();
-	void Draw();
+	void Draw(bool debug);
 
 	// À•W‚ğæ“¾
 	const DirectX::SimpleMath::Vector3& GetTrans();
@@ -68,4 +68,8 @@ public:
 	//const SoherNode& GetCollisionNode() { return m_collisiorNode; }
 
 	const SoherNode& GetCollisionNodeBody() { return m_collisionNodeBody; }
+
+
+	void moveRotation();//‰ñ“]Šp‚ğŒˆ‚ß‚é
+	void moveransform();//ˆÚ“®æ‚ğŒˆ‚ß‚é
 };

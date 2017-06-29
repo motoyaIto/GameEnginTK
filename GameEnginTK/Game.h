@@ -18,6 +18,8 @@
 #include "Obj3d.h"
 #include "Player.h"
 #include "Enemy.h"
+#include <SpriteBatch.h>
+
 // A basic game implementation that creates a D3D11 device and
 // provides a game loop.
 class Game
@@ -131,7 +133,7 @@ private:
 
 	//キーボード
 	std::unique_ptr<DirectX::Keyboard> keyboard;
-
+	DirectX::Keyboard::KeyboardStateTracker m_keyboadTraker;	//キーボードトラッカー
 	//自機の座標
 	DirectX::SimpleMath::Vector3 tank_pos;
 	//自機の回転
@@ -150,4 +152,15 @@ private:
 	//敵
 	std::vector<std::unique_ptr<Enemy>> m_Enemy;
 
+
+	int m_killEnemy;
+
+	bool debugMode;
+
+	//クリア
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_texture;
+	std::unique_ptr<DirectX::CommonStates> m_states;
+	std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+	DirectX::SimpleMath::Vector2 m_screenPos;
+	DirectX::SimpleMath::Vector2 m_origin;
 };
